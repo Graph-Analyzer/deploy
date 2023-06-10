@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.graphAnalyzerApi.name }}-config"
+  labels:
+    app: {{ .Values.graphAnalyzerApi.name | quote }}
+data:
+  NEO4J_HOST: {{ .Values.config.neo4j.neo4jHost | quote}}
+  NEO4J_PORT: {{ .Values.config.neo4j.neo4jPort | quote }}
+  NEO4J_REALM: {{ .Values.config.neo4j.neo4jRealm | quote }}
+  GRPC_HOST: {{ .Values.graphAnalyzerDataCollector.name | quote }}
+  GRPC_PORT: {{ .Values.graphAnalyzerDataCollector.config.appServerPort | quote }}
+  GIN_MODE: "release"

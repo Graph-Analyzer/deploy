@@ -1,0 +1,7 @@
+Access your graph-analyzer:
+
+API:
+https://{{ .Values.config.ingress.ingressApi }}
+
+Frontend:
+https://{{ .Values.config.ingress.ingressFrontend }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.graphAnalyzerFrontend.name }}
+  labels:
+    app: {{ .Values.graphAnalyzerFrontend.name }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: "{{ .Values.graphAnalyzerFrontend.name }}-http"
+      port: 4000
+      protocol: TCP
+      targetPort: {{ .Values.graphAnalyzerFrontend.config.appServerPort }}
+  selector:
+    app: {{ .Values.graphAnalyzerFrontend.name }}

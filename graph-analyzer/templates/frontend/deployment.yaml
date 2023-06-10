@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.graphAnalyzerFrontend.name }}"
+spec:
+  replicas: {{ .Values.graphAnalyzerFrontend.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.graphAnalyzerFrontend.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.graphAnalyzerFrontend.name }}"
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/frontend/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Values.graphAnalyzerFrontend.name }}"
+          image: "{{ .Values.graphAnalyzerFrontend.image.repository }}:{{ .Values.release.graphAnalyzerFrontendTag }}"
+          imagePullPolicy: Always
+          resources:
+            {{- toYaml .Values.graphAnalyzerFrontend.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: "/usr/share/nginx/html/config.js"
+              subPath: "config.js"
+      volumes:
+        - name: config
+          configMap:
+            name: "{{ .Values.graphAnalyzerFrontend.name }}-config"
+            items:
+              - key: "web.properties"
+                path: "config.js"

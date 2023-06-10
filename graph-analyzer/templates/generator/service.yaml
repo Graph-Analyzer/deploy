@@ -1,0 +1,17 @@
+{{- if .Values.graphGenerator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.graphGenerator.name }}
+  labels:
+    app: {{ .Values.graphGenerator.name }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: "{{ .Values.graphGenerator.name }}-http"
+      port: {{ .Values.graphGenerator.config.appServerPort }}
+      protocol: TCP
+      targetPort: {{ .Values.graphGenerator.config.appServerPort }}
+  selector:
+    app: {{ .Values.graphGenerator.name }}
+{{- end }}

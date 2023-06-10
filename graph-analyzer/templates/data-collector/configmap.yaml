@@ -1,0 +1,17 @@
+{{- if .Values.graphAnalyzerDataCollector.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.graphAnalyzerDataCollector.name }}-config"
+  labels:
+    app: {{ .Values.graphAnalyzerDataCollector.name | quote }}
+data:
+    NEO4J_HOST: {{ .Values.config.neo4j.neo4jHost | quote }}
+    NEO4J_PORT: {{ .Values.config.neo4j.neo4jPort | quote }}
+    {{- if .Values.config.jalapeno.enabled }}
+    JAGW_HOST: {{ .Values.config.jalapeno.jagwURL | quote }}
+    {{- end }}
+    {{- if .Values.config.gexflistener.enabled }}
+    GRPC_HOST: "0.0.0.0"
+    {{- end }}
+{{- end }}

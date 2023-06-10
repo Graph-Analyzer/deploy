@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.graphAnalyzerApi.name }}"
+spec:
+  replicas: {{ .Values.graphAnalyzerApi.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.graphAnalyzerApi.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.graphAnalyzerApi.name }}"
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/api/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Values.graphAnalyzerApi.name }}"
+          image: "{{ .Values.graphAnalyzerApi.image.repository }}:{{ .Values.release.graphAnalyzerApiTag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.graphAnalyzerApi.config.appServerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: {{ .Values.graphAnalyzerApi.config.appServerPort }}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: {{ .Values.graphAnalyzerApi.config.appServerPort }}
+          resources:
+            {{- toYaml .Values.graphAnalyzerApi.resources | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: "{{ .Values.graphAnalyzerApi.name }}-config"
+            - secretRef:
+                name: "{{ .Values.graphAnalyzerApi.name }}-secret"

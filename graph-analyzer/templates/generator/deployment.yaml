@@ -1,0 +1,37 @@
+{{- if .Values.graphGenerator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.graphGenerator.name }}"
+spec:
+  replicas: {{ .Values.graphGenerator.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.graphGenerator.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.graphGenerator.name }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Values.graphGenerator.name }}"
+          image: "{{ .Values.graphGenerator.image.repository }}:{{ .Values.release.graphGeneratorTag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.graphGenerator.config.appServerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.graphGenerator.config.appServerPort }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.graphGenerator.config.appServerPort }}
+          resources:
+            {{- toYaml .Values.graphGenerator.resources | nindent 12 }}
+{{- end }}

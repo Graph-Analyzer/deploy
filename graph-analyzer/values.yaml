@@ -1,0 +1,139 @@
+imagePullSecrets:
+  - name: regcred
+
+release:
+  graphAnalyzerApiTag: 2.0.0
+  graphAnalyzerDataCollectorTag: 2.0.0
+  graphAnalyzerFrontendTag: 2.0.1
+  graphGeneratorTag: 1.0.0
+  # Neo4j image tag is defined later - helm limitation
+
+config:
+  jalapeno:
+    enabled: false
+    jagwURL: "CHANGEME"
+  gexflistener:
+    enabled: true
+    
+  ingress:
+    ingressApi: "graph-analyzer-api.CHANGEME"
+    ingressGeneratorApi: "graph-generator-api.CHANGEME"
+    ingressFrontend: "graph-analyzer.CHANGEME"
+
+  neo4j:
+    neo4jHost: "bolt://graph-analyzer" #"{{ $.Release.Name }}"
+    neo4jPort: "7687"
+    neo4jUser: "neo4j"
+    neo4jPassword: &neo4jPassword "CHANGEME"
+    neo4jPullUser: &neo4jPullUser "CHANGEME"
+    neo4jPullPassword: &neo4jPullPassword "CHANGEME"
+    neo4jRealm: " "
+
+
+
+neo4j-standalone:
+  neo4j:
+    name: "database"
+    password: *neo4jPassword
+    edition: "community"
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "4Gi"
+      limits:
+        cpu: "4000m"
+        memory: "10Gi"
+
+  services:
+    neo4j:
+      enabled: false
+    admin:
+      enabled: false
+
+  config:
+    dbms.security.procedures.unrestricted: "gds.*, apoc.*"
+    dbms.security.procedures.allowlist: "gds.*, apoc.*"
+    server.jvm.additional: "-XX:+ExitOnOutOfMemoryError"
+    server.memory.heap.initial_size: "3500m"
+    server.memory.heap.max_size: "3500m"
+    server.memory.pagecache.size: "1900m"
+
+  volumes:
+    data:
+      mode: defaultStorageClass
+      defaultStorageClass:
+        requests:
+          storage: 2Gi
+
+  image:
+    customImage: "CHANGEME: https://github.com/Graph-Analyzer/neo4j-image"
+    imagePullSecrets:
+      - "neo4j"
+    imageCredentials:
+      - registry: "CHANGEME"
+        username: *neo4jPullUser
+        password: *neo4jPullPassword
+        email: "demo@example.com"
+        name: "CHANGEME"
+
+graphAnalyzerApi:
+  name: api
+  replicas: 1
+  image:
+    repository: "CHANGEME https://github.com/Graph-Analyzer/api"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 100Mi
+    limits:
+      cpu: 4000m
+      memory: 10Gi
+  config:
+    appServerPort: 8080
+
+graphAnalyzerFrontend:
+  name: frontend
+  replicas: 1
+  image:
+    repository: "CHANGEME https://github.com/Graph-Analyzer/frontend"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 20Mi
+    limits:
+      cpu: 100m
+      memory: 100Mi
+  config:
+    appServerPort: 4000
+
+graphAnalyzerDataCollector:
+  enabled: true
+  name: data-collector
+  replicas: 1
+  image:
+    repository: "CHANGEME https://github.com/Graph-Analyzer/data-collector"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 100Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  config:
+    appServerPort: 8081
+
+graphGenerator:
+  enabled: true
+  name: generator
+  replicas: 2
+  image:
+    repository: "CHANGEME https://github.com/Graph-Analyzer/graph-generator"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 200Mi
+    limits:
+      cpu: 4000m
+      memory: 5Gi
+  config:
+    appServerPort: 8082

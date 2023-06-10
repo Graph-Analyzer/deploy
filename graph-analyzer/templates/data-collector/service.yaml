@@ -1,0 +1,17 @@
+{{- if and .Values.graphAnalyzerDataCollector.enabled .Values.config.gexflistener.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.graphAnalyzerDataCollector.name }}
+  labels:
+    app: {{ .Values.graphAnalyzerDataCollector.name }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: "{{ .Values.graphAnalyzerDataCollector.name }}-grpc"
+      port: {{ .Values.graphAnalyzerDataCollector.config.appServerPort }}
+      protocol: TCP
+      targetPort: {{ .Values.graphAnalyzerDataCollector.config.appServerPort }}
+  selector:
+    app: {{ .Values.graphAnalyzerDataCollector.name }}
+{{- end }}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.graphAnalyzerFrontend.name }}-config"
+  labels:
+    app: {{ .Values.graphAnalyzerFrontend.name }}
+data:
+  web.properties: |
+    window.GRAPH_ANALYZER_API_URL= "https://{{ .Values.config.ingress.ingressApi }}"
+    window.GRAPH_GENRATOR_API_URL= "https://{{ .Values.config.ingress.ingressGeneratorApi }}"

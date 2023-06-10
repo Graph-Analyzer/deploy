@@ -1,0 +1,6 @@
+dependencies:
+- name: neo4j-standalone
+  repository: https://helm.neo4j.com/neo4j
+  version: 4.4.19
+digest: sha256:714b5085dd146c52a3a47fb352808fcd5b31d87fb637c4b9a52ad6f3be0260ab
+generated: "2023-04-20T10:32:40.915041+02:00"

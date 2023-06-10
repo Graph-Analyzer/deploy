@@ -1,0 +1,46 @@
+{{- if .Values.graphAnalyzerDataCollector.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+{{- if .Values.config.jalapeno.enabled }}
+{{- if .Values.config.gexflistener.enabled }}
+{{- fail "Only one of config.jalapeno.enabled or config.gexflistener.enabled should be set to true" }}
+{{- end }}
+{{- end }}
+metadata:
+  name: "{{ .Values.graphAnalyzerDataCollector.name }}"
+spec:
+  replicas: {{ .Values.graphAnalyzerDataCollector.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.graphAnalyzerDataCollector.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.graphAnalyzerDataCollector.name }}"
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/data-collector/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/data-collector/secret.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Values.graphAnalyzerDataCollector.name }}"
+          image: "{{ .Values.graphAnalyzerDataCollector.image.repository }}:{{ .Values.release.graphAnalyzerDataCollectorTag }}"
+          imagePullPolicy: Always
+          command: ["./data-collector"]
+          {{- if .Values.config.jalapeno.enabled }}
+          args: ["-v", "jalapeno"]
+          {{- end }}
+          {{- if .Values.config.gexflistener.enabled }}
+          args: ["-v", "gexf", "-l"]
+          {{- end }}
+          resources:
+            {{- toYaml .Values.graphAnalyzerDataCollector.resources | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: "{{ .Values.graphAnalyzerDataCollector.name }}-config"
+            - secretRef:
+                name: "{{ .Values.graphAnalyzerDataCollector.name }}-secret"
+{{- end }}

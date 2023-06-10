@@ -1,0 +1,21 @@
+{{- if .Values.graphGenerator.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Values.graphGenerator.name }}-ingress"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 9m
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.config.ingress.ingressGeneratorApi }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.graphGenerator.name }}
+                port:
+                  number: 8082
+{{- end }}
